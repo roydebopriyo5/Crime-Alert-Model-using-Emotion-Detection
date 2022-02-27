@@ -25,9 +25,9 @@ face_detection = cv2.CascadeClassifier(detection_model_path)
 emotion_classifier = load_model(emotion_model_path, compile=False)
 EMOTIONS = ["angry", "disgust", "scared", "", "sad", "", ""]     #["angry", "disgust", "scared", "happy", "sad", "surprised", "neutral"]
 
-sender = 'draxecom@gmail.com'
+sender = '... sender mail id'
 password = '... password of sender id'
-receivers = 'roydebopriyo5@gmail.com'
+receivers = '... receiver mail id'
 
 message = MIMEMultipart()
 message['From'] = sender
@@ -38,9 +38,9 @@ s = smtplib.SMTP('smtp.gmail.com', 587)   # creates SMTP session
 s.starttls()                              # start TLS for security
 s.login(sender, password)                 # Authentication
 
-access_token = '95a47d47783322'   # alternative of API
-g = geocoder.ipinfo('me')         # finding IP Address and Location
-ip = g.ip                         # storing IP Address
+access_token = '... token'   # alternative of API
+g = geocoder.ipinfo('me')    # finding IP Address and Location
+ip = g.ip                    # storing IP Address
 
 def capture():
     img_name = "img_{}.png".format(count)
@@ -99,7 +99,7 @@ while True:
 
             message.attach(MIMEText(body, 'plain'))
             filename = "img_{}.png".format(count)
-            attachment = open("C:/Users/Debopriyo Roy/Downloads/Rape Detection/{}".format(filename), "rb")
+            attachment = open("C:/Users/Debopriyo Roy/Downloads/Crime Alert Model/{}".format(filename), "rb")
             p = MIMEBase('application', 'octet-stream')   # instance of MIMEBase
             p.set_payload((attachment).read())            # to change the payload into encoded form
             encoders.encode_base64(p)                     # encode into base64
