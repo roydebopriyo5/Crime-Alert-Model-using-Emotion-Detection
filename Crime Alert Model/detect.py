@@ -25,9 +25,9 @@ face_detection = cv2.CascadeClassifier(detection_model_path)
 emotion_classifier = load_model(emotion_model_path, compile=False)
 EMOTIONS = ["angry", "disgust", "scared", "", "sad", "", ""]     #["angry", "disgust", "scared", "happy", "sad", "surprised", "neutral"]
 
-sender = '... sender mail id'
-password = '... password of sender id'
-receivers = '... receiver mail id'
+sender = '...sender email id'
+password = '...password of sender email id'
+receivers = '...receiver email id'
 
 message = MIMEMultipart()
 message['From'] = sender
@@ -38,18 +38,35 @@ s = smtplib.SMTP('smtp.gmail.com', 587)   # creates SMTP session
 s.starttls()                              # start TLS for security
 s.login(sender, password)                 # Authentication
 
-access_token = '... token'   # alternative of API
-g = geocoder.ipinfo('me')    # finding IP Address and Location
-ip = g.ip                    # storing IP Address
+access_token = '...token'   # alternative of API
+g = geocoder.ipinfo('me')         # finding IP Address and Location
+ip = g.ip                         # storing IP Address   
 
-def capture():
+def knocking(count):
     img_name = "img_{}.png".format(count)
     cv2.imwrite(img_name, frame)
-    print("{} written".format(img_name))
 
-schedule.every(2).seconds.do(capture)
+    handler = ipinfo.getHandler(access_token)   # find ip information
+    details = handler.getDetails(ip)            # find coordinates
+
+    body = """
+    Emergency...!! Emergency...!!
+
+        Location coordinates - {}
+    """.format(details.loc)
+
+    message.attach(MIMEText(body, 'plain'))
+    attachment = open("C:/Users/Debopriyo Roy/Downloads/Crime Alert Model/{}".format(img_name), "rb")
+    p = MIMEBase('application', 'octet-stream')   # instance of MIMEBase
+    p.set_payload((attachment).read())            # to change the payload into encoded form
+    encoders.encode_base64(p)                     # encode into base64
+    p.add_header('Content-Disposition', "attachment; filename= %s" % img_name)
+    message.attach(p)
+    e_mail = message.as_string()   # Converts the Multipart message into a string
+
+    s.sendmail(sender, receivers, e_mail)
+
 count = 0
-
 cv2.namedWindow('face')
 camera = cv2.VideoCapture(0)
 while True:
@@ -76,38 +93,12 @@ while True:
         emotion_probability = np.max(preds)
         label = EMOTIONS[preds.argmax()]
         
-        mail = 0
-        # arduino portion
         if label == "disgust" or label == "scared" or label == "sad":
-            winsound.Beep(500, 500)   # sound effect
-            print("Alert")
-            mail = 1
             count += 1
-            schedule.run_pending()    # trigger image capture function
+            winsound.Beep(500, 500)   # sound effect
+            knocking(count)
             #.....add Arduino Pass Code or any relevant
 
-        if mail > 0 :
-            handler = ipinfo.getHandler(access_token)   # find ip information
-            details = handler.getDetails(ip)            # find coordinates
-
-            body = """
-            F**k! I'm gonno sue all if I have to pay medical bills;
-            otherwise, I can kick their a**, oh dear! that sounds better.
-
-                Location coordinates - {}
-            """.format(details.loc)
-
-            message.attach(MIMEText(body, 'plain'))
-            filename = "img_{}.png".format(count)
-            attachment = open("C:/Users/Debopriyo Roy/Downloads/Crime Alert Model/{}".format(filename), "rb")
-            p = MIMEBase('application', 'octet-stream')   # instance of MIMEBase
-            p.set_payload((attachment).read())            # to change the payload into encoded form
-            encoders.encode_base64(p)                     # encode into base64
-            p.add_header('Content-Disposition', "attachment; filename= %s" % filename)
-            message.attach(p)
-            e_mail = message.as_string()   # Converts the Multipart message into a string
-
-            s.sendmail(sender, receivers, e_mail)
     else: continue
  
     for (i, (emotion, prob)) in enumerate(zip(EMOTIONS, preds)):
