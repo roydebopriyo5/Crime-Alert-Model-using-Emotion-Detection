@@ -93,7 +93,7 @@ while True:
         emotion_probability = np.max(preds)
         label = EMOTIONS[preds.argmax()]
         
-        if label == "disgust" or label == "scared" or label == "sad":
+        if label == "angry" or label == "disgust" or label == "scared" or label == "sad":
             count += 1
             winsound.Beep(500, 500)   # sound effect
             knocking(count)
